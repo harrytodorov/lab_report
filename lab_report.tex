@@ -21,8 +21,6 @@
 
 \documentclass{article}
 
-\usepackage[version=3]{mhchem} % Package for chemical equation typesetting
-\usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
 \usepackage{graphicx} % Required for the inclusion of images
 \graphicspath{ {images/} } % path for images
 \usepackage{wrapfig} % places floating figures on the side 
@@ -67,7 +65,7 @@ Advisor: & Prof. Dr.-Ing. Matthias Teschner % Instructor/supervisor
 
 \section{Introduction}
 \label{sec:intro}
-The main objective of the current lab project was to make the author familiar with the basic concepts of a ray tracer by implementing one. This lab report aims to present the gathered knowledge.
+The main objective of the \textit{Lab project: Computer Graphics} was to make the author familiar with the basic concepts of a ray tracer by implementing one. This lab report aims to present the gathered knowledge.
 
 % explain the structure of the current lab report
 \subsection{Report overview}
@@ -75,7 +73,7 @@ The report is split in five chapters with each chapter explaining a certain part
 
 \vspace*{\baselineskip}
 
-Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays along with some information on where do the roots of \textit{ray tracing} come from and the basic idea of the ray tracing algorithm.
+Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays along with some information on where do the roots of ray tracing come from and the basic idea of the ray tracing algorithm.
 
 \vspace*{\baselineskip}
 
@@ -87,8 +85,12 @@ Chapter (\ref{sec:cameras}) is concerned with how the camera and the image plane
 
 \vspace*{\baselineskip}
 
+Chapter (\ref{sec:shading}) deals with visual appearence of objects rendered in a scene. It begins by explaining how light sources are modeled, goes on with the concept behind the Phong illumination model and the physical motivation behind its components, how shadows are ray traced and lastly it presents reflective and refracitve materials and how these type of materials are ray traced.
+
+\vspace*{\baselineskip}
+
 Chapter (\ref{sec:transform}) deals with transformations, explaining the motivation behind the use of homogeneous notation, the different type of supported transformations on objects, light sources and cameras and why is the inverse view transformation useful in a ray tracer.
-%
+
 \vspace*{\baselineskip}
 
 Chapter (\ref{sec:accel}) is concerned with how one can reduce the computation time per generated image by introducing acceleration structures. Firstly explaining the concept behind axis-aligned bounding boxes and the benefits they bring, followed by the a more advanced acceleration method, the uniform grid.
@@ -97,7 +99,7 @@ Chapter (\ref{sec:accel}) is concerned with how one can reduce the computation t
 \subsection{Why is ray tracing important}
 Ray tracing is one of the rendering techniques capable of producing images with a high degree of visual realism and which can also naturally incorporate physically motivated visual effects such as reflections, refractions, caustics, soft shadows and others. This advantage makes the technique very attractive to movie and commercial studios, automotive industry (see figure \ref{fig:audi}) as well as architectural design studios to simulate realistic illumination.  
 
-% show image from "Life of Pi"
+% show car image
 \begin{figure}[h!]
     \caption{"Another R8" by Filip Sadlon produced using Blender Render}
     \includegraphics[width=0.8\textwidth]{audi}
@@ -109,12 +111,32 @@ Though great computation times, major animation studios seems nowadays to be fon
 
 % some history behind ray tracing
 \subsection{The roots of ray tracing}
-The first ray tracing algorithm was introduced by Arthur Appel in 1968 \cite{appel}, which idea was to shoot from the eye, one per pixel, and find the closest object blocking the path of that ray. Using the material properties and the effect of the lights in the scene, this algorithm can determine the shading of objects. \\
-The next notable contribution in ray tracing was made by Turner Whitted in 1979 \cite{whitted}, who introduced natural ray technique to compute shadows as well as recursive ray tracing to handle reflective and refractive materials. \\
-Other major contributions in the scene of ray tracing were made by Robert Cook in 1984 \cite{cook} and James Kajiya in 1986 \citep{kajiya} introducing distributed ray tracing and the Rendering equation respectively. But because the accompanying ray tracer does not make extensive use of these concepts, they won't be discussed in detail.
+The first ray tracing algorithm was introduced by Arthur Appel in 1968 \cite{appel}, which idea was to shoot rays from the eye (camera), one per pixel, and find the closest object blocking the path of that ray. Using the material properties and the effect of the lights in the scene, this algorithm can determine the shading of objects. \\
+The next notable contribution in ray tracing was made by Turner Whitted in 1979 \cite{whitted}, who introduced a technique to compute shadows as well as the idea of recursive ray tracing to handle reflective and refractive materials. (see figure \ref{fig:whitted_example}).  
+
+% show whitted like image
+\begin{wrapfigure}{R}{0.5\textwidth}
+    \caption{A Whitted-like scene with reflective (back) and refractive (front left) spheres rendered in the accompanying ray tracer}
+    \includegraphics[width=1.0\textwidth]{whitted_example}
+    \label{fig:whitted_example}
+\end{wrapfigure}
+
+Other major contributions in the scene of ray tracing were made by Robert Cook in 1984 \cite{cook} and James Kajiya in 1986 \citep{kajiya} introducing distributed ray tracing and the Rendering equation respectively. Because the accompanying ray tracer does not make extensive use of these concepts, they won't be discussed in detail.
 
 % basic ray tracing algorithm concept
+\subsection{Basics of the ray tracing algorithm}
+For the following explanation we make the assumption we have a camera with perspective projection. The algorithm then works by tracing a path from an imaginary eye (camera) through each pixel in a virtual image plane (in front of the camera) and calculating the radiance of the object visible through it. 
 
+% show image depicting basic ray tracing algorithm
+\begin{wrapfigure}{l}{0.5\textwidth}
+    \caption{Image depicting the concept behind the ray tracing algorithm. Wikipedia}
+    \includegraphics[width=0.9\textwidth]{ray_trace_algo}
+    \label{fig:concept}
+\end{wrapfigure}
+
+Typically, each ray must be tested for intersection with some subset of all the objects in the scene. Once the nearest object has been identified, the algorithm will estimate the incoming light at the point of intersection, examine the material properties of the object, and combine this information to calculate the final color of the pixel. 
+
+\clearpage
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -123,6 +145,33 @@ Other major contributions in the scene of ray tracing were made by Robert Cook i
 \section{Ray-object intersection tests}
 \label{sec:isects}
 
+% how is a ray geometrically defined
+
+% components of the ray within the ray tracer
+
+% types of ray
+
+% how is a sphere defined in the ray tracer
+
+% ray-sphere intersection
+
+% render multiple spheres + time measurements
+
+% how is a axis aligned bounding-box defined in the ray tracer
+
+% ray-aabb intersection
+
+% how is a triangle defined in the ray-tracer
+
+% ray-triangle intersection (geometric)
+
+% render multiple triangles + time measurements
+
+% how is a triangulated mesh defined in the ray-tracer
+
+% ray-triangle intersection (MT)
+
+% show image of rendered triangulated mesh
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -135,18 +184,26 @@ Other major contributions in the scene of ray tracing were made by Robert Cook i
 %	SECTION 4
 %----------------------------------------------------------------------------------------
 
-\section{Transformations}
-\label{sec:transform}
+\section{Shading}
+\label{sec:shading}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 5
 %----------------------------------------------------------------------------------------
 
-\section{Acceleration structures}
-\label{sec:accel}
+\section{Transformations}
+\label{sec:transform}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 6
+%----------------------------------------------------------------------------------------
+
+\section{Acceleration structures}
+\label{sec:accel}
+
+
+%----------------------------------------------------------------------------------------
+%	SECTION 7
 %----------------------------------------------------------------------------------------
 
 \section{Answers to Definitions}
