@@ -23,8 +23,7 @@
 
 \usepackage{graphicx} % Required for the inclusion of images
 \graphicspath{ {images/} } % path for images
-\usepackage{wrapfig} % places floating figures on the side 
-\usepackage{floatrow}
+\usepackage{subcaption}
 \usepackage{natbib} % Required to change bibliography style to APA
 \usepackage{amsmath} % Required for some math elements 
 
@@ -97,14 +96,29 @@ Chapter (\ref{sec:accel}) is concerned with how one can reduce the computation t
 
 % why should one bother to implement a ray tracer
 \subsection{Why is ray tracing important}
-Ray tracing is one of the rendering techniques capable of producing images with a high degree of visual realism and which can also naturally incorporate physically motivated visual effects such as reflections, refractions, caustics, soft shadows and others. This advantage makes the technique very attractive to movie and commercial studios, automotive industry (see figure \ref{fig:audi}) as well as architectural design studios to simulate realistic illumination.  
+Ray tracing is one of the rendering techniques capable of producing images with a high degree of visual realism and which can also naturally incorporate physically motivated visual effects such as reflections, refractions, caustics, soft shadows and others. This advantage makes the technique very attractive to movie and commercial studios, automotive industry (see figure \ref{fig:audi}) as well as architectural design studios (see figure \ref{fig:arch}) to simulate realistic illumination.  
 
-% show car image
-\begin{figure}[h!]
-    \caption{"Another R8" by Filip Sadlon produced using Blender Render}
-    \includegraphics[width=0.8\textwidth]{audi}
-    \label{fig:audi}
+\begin{figure}[h]
+	\centering
+	
+	% show car image
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=0.9\textwidth]{audi}
+		\caption{"Another R8" by Filip Sadlon \\ rendered using Blender Render}
+		\label{fig:audi}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=0.9\textwidth]{archi_render}
+		\caption{"Mies Van Der Rohe Farnsworth House" by Alessandro Prodan using Mental Ray}
+		\label{fig:arch}
+	\end{subfigure}
+	
+	\caption{Ray tracing used for visualisations by different industries}
+	\label{fig:image2}
 \end{figure}
+
+
 
 Although one can produce very stunning imagery with a ray tracing based render engine, this  comes at a great computation cost, e.g.\ a frame from a recent computer generated Pixar's movie takes between three and eight hours to render. \cite{pixarRentime} \\
 Though great computation times, major animation studios seems nowadays to be fond of ray tracing and make switches from scanline-based rendering approaches such as "REYES" which were proved stable and fast over the years to ray tracing. \cite{pixarSwitch} That points to the demands in the entertainment industry for more physically accurate imagery, but also pushes the boundaries of research in ray tracing and its computational efficiency. \cite{disneyHyperion}
@@ -114,29 +128,29 @@ Though great computation times, major animation studios seems nowadays to be fon
 The first ray tracing algorithm was introduced by Arthur Appel in 1968 \cite{appel}, which idea was to shoot rays from the eye (camera), one per pixel, and find the closest object blocking the path of that ray. Using the material properties and the effect of the lights in the scene, this algorithm can determine the shading of objects. \\
 The next notable contribution in ray tracing was made by Turner Whitted in 1979 \cite{whitted}, who introduced a technique to compute shadows as well as the idea of recursive ray tracing to handle reflective and refractive materials. (see figure \ref{fig:whitted_example}).  
 
-% show whitted like image
-\begin{wrapfigure}{R}{0.5\textwidth}
-    \caption{A Whitted-like scene with reflective (back) and refractive (front left) spheres rendered in the accompanying ray tracer}
-    \includegraphics[width=1.0\textwidth]{whitted_example}
-    \label{fig:whitted_example}
-\end{wrapfigure}
-
 Other major contributions in the scene of ray tracing were made by Robert Cook in 1984 \cite{cook} and James Kajiya in 1986 \citep{kajiya} introducing distributed ray tracing and the Rendering equation respectively. Because the accompanying ray tracer does not make extensive use of these concepts, they won't be discussed in detail.
+
+% show whitted like image
+\begin{figure}[h]
+	\centering
+    \includegraphics[width=0.8\textwidth]{whitted_example}
+    \caption{A Whitted-like scene with reflective (back) and refractive (front left) spheres rendered in the accompanying ray tracer}
+    \label{fig:whitted_example}
+\end{figure}
 
 % basic ray tracing algorithm concept
 \subsection{Basics of the ray tracing algorithm}
-For the following explanation we make the assumption we have a camera with perspective projection. The algorithm then works by tracing a path from an imaginary eye (camera) through each pixel in a virtual image plane (in front of the camera) and calculating the radiance of the object visible through it. 
+For the following explanation we make the assumption we have a camera with perspective projection. The algorithm then works by tracing a path from an imaginary eye (camera) through each pixel in a virtual image plane (in front of the camera) and calculating the radiance of the object visible through it.
+
+Typically, each ray must be tested for intersection with some subset of all the objects in the scene. Once the nearest object has been identified, the algorithm will estimate the incoming light at the point of intersection, examine the material properties of the object, and combine this information to calculate the final color of the pixel (see figure \ref{fig:concept}). 
 
 % show image depicting basic ray tracing algorithm
-\begin{wrapfigure}{l}{0.5\textwidth}
-    \caption{Image depicting the concept behind the ray tracing algorithm. Wikipedia}
-    \includegraphics[width=0.9\textwidth]{ray_trace_algo}
+\begin{figure}[h]
+	\centering
+    \includegraphics[width=0.7\textwidth]{ray_trace_algo}
+	\caption{Image depicting the concept behind the ray tracing algorithm. Wikipedia}
     \label{fig:concept}
-\end{wrapfigure}
-
-Typically, each ray must be tested for intersection with some subset of all the objects in the scene. Once the nearest object has been identified, the algorithm will estimate the incoming light at the point of intersection, examine the material properties of the object, and combine this information to calculate the final color of the pixel. 
-
-\clearpage
+\end{figure}
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -144,12 +158,25 @@ Typically, each ray must be tested for intersection with some subset of all the 
 
 \section{Ray-object intersection tests}
 \label{sec:isects}
+To explore ray-object intersections, one have to define first what is an intersection. An intersection is a point(s) along a half-line (from now on I'll use the word \textit{ray} meaning half-line) on which the given ray intersects a certain object. Mostly one is interested in the nearest intersection point along a ray. \\
+To find an intersection points between a ray and an object, one needs two definitions, one for the ray and one for the object which the ray intersects with. First comes the definition for a ray, since a ray is needed for all type of ray-object intersections.
+
+\subsection{Ray}
 
 % how is a ray geometrically defined
+A ray is geometrically defined using two vectors: a point $o$, which is called the \textit{origin} and a normal vector $\hat{d}$, which is gives the \textit{direction} of this ray. To be able to give the location of an intersection point $p$ along this ray, one introduces a scalar value $t$, which is the distance between the ray's origin $o$ and the intersection point $p$ we're looking for. One is mainly interested in intersection points "in front" of a ray, so the values for $t$ should be positive. The equation for the intersection point we'll be using from now on looks like: \cite{rftgu}
+
+% intersection point along a ray
+\begin{align}
+	p(t) = o + t\hat{d}
+\end{align}
 
 % components of the ray within the ray tracer
-
-% types of ray
+Within the implemented ray tracer a ray has five data members: origin point, direction, inverse of the the direction ($1 / \hat{d}$), sign of the ray's direction and a type component. \\
+The author has decided not to have an intersection point data member stored within the ray for memory efficiency. Depending on the scene a big part of the rays could not have any intersection points at all.\\
+The inverse of the ray's direction and sign of the ray's direction data members are used to optimize the performance of the ray-axis-aligned bounding box intersection test. Details will be provided on the following section on the topic.\\
+% types of a ray
+The type component is used for distinguishing between different type of rays and printing out a statistic for a given rendered scene. One distinguishes between following ray types in the implemented ray tracer: primary, shadow, reflection and refraction rays.
 
 % how is a sphere defined in the ray tracer
 
