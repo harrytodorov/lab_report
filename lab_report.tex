@@ -23,9 +23,11 @@
 
 \usepackage{graphicx} % Required for the inclusion of images
 \graphicspath{ {images/} } % path for images
-\usepackage{subcaption}
+\usepackage{subcaption} % placing multiple images on one by one in a line
+\usepackage{wrapfig} % placing an image along with text in a line
 \usepackage{natbib} % Required to change bibliography style to APA
 \usepackage{amsmath} % Required for some math elements 
+\usepackage{enumerate} % use enumarated lists
 
 \setlength\parindent{0pt} % Removes all indentation from paragraphs
 
@@ -68,11 +70,11 @@ The main objective of the \textit{Lab project: Computer Graphics} was to make th
 
 % explain the structure of the current lab report
 \subsection{Report overview}
-The report is split in five chapters with each chapter explaining a certain part of the implemented ray tracer. The ordering of the chapters try to follow the implementation order the author followed during the project. 
+The report is split into five chapters with, each explaining a certain part of the implemented ray tracer. The ordering of the chapters tries to follow the implementation order the author followed during the project. 
 
 \vspace*{\baselineskip}
 
-Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays along with some information on where do the roots of ray tracing come from and the basic idea of the ray tracing algorithm.
+Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays, along with some information on the roots of ray tracing and the basic idea of the ray tracing algorithm.
 
 \vspace*{\baselineskip}
 
@@ -80,23 +82,23 @@ Chapter (\ref{sec:isects}) deals with one of the fundamental parts of a ray trac
 
 \vspace*{\baselineskip}
 
-Chapter (\ref{sec:cameras}) is concerned with how the camera and the image plane are modelled in the ray tracer. It explains the virtual pinhole camera model, how the image plane is mapped within the 3D scene and the two supported camera projections - orthographic and perspective along with their configurable parameters. The chapter goes on with how are rays shot from the image plane and how can one reduce aliasing artefacts by using half-jittered sampling technique. It finishes with the use of gamma correction to enhance the visual appearance of the generated images. 
+Chapter (\ref{sec:cameras}) is concerned with how the camera and the image plane are modelled in the ray tracer. It explains the virtual pinhole camera model, how the image plane is mapped within the 3D scene and the two supported camera projections - orthographic and perspective along with their configurable parameters. The chapter goes on with how rays are shot from the image plane and how one can reduce aliasing artefacts by using half-jittered sampling technique. It finishes with the use of gamma correction to enhance the visual appearance of the generated images. 
 
 \vspace*{\baselineskip}
 
-Chapter (\ref{sec:shading}) deals with visual appearence of objects rendered in a scene. It begins by explaining how light sources are modeled, goes on with the concept behind the Phong illumination model and the physical motivation behind its components, how shadows are ray traced and lastly it presents reflective and refracitve materials and how these type of materials are ray traced.
+Chapter (\ref{sec:shading}) deals with the visual appearance of objects rendered in a scene. It begins by explaining how light sources are modeled, goes on with the concept behind the Phong illumination model and the physical motivation behind its components, how shadows are ray traced and lastly, it presents reflective and refractive materials and how these types of materials are ray traced.
 
 \vspace*{\baselineskip}
 
-Chapter (\ref{sec:transform}) deals with transformations, explaining the motivation behind the use of homogeneous notation, the different type of supported transformations on objects, light sources and cameras and why is the inverse view transformation useful in a ray tracer.
+Chapter (\ref{sec:transform}) deals with transformations, explaining the motivation behind the use of homogeneous notation, the different type of supported transformations on objects, light sources and cameras and why the inverse view transformation is useful in a ray tracer.
 
 \vspace*{\baselineskip}
 
-Chapter (\ref{sec:accel}) is concerned with how one can reduce the computation time per generated image by introducing acceleration structures. Firstly explaining the concept behind axis-aligned bounding boxes and the benefits they bring, followed by the a more advanced acceleration method, the uniform grid.
+Chapter (\ref{sec:accel}) is concerned with how one can reduce the computation time per generated image by introducing acceleration structures. Firstly, it explains the concept behind axis-aligned bounding boxes and the benefits they bring, followed by a more advanced acceleration method, the uniform grid.
 
 % why should one bother to implement a ray tracer
 \subsection{Why is ray tracing important}
-Ray tracing is one of the rendering techniques capable of producing images with a high degree of visual realism and which can also naturally incorporate physically motivated visual effects such as reflections, refractions, caustics, soft shadows and others. This advantage makes the technique very attractive to movie and commercial studios, automotive industry (see figure \ref{fig:audi}) as well as architectural design studios (see figure \ref{fig:arch}) to simulate realistic illumination.  
+Ray tracing is one of the rendering techniques capable of producing images with a high degree of visual realism. It can naturally incorporate physically motivated visual effects such as reflections, refractions, caustics, soft shadows and others. This advantage makes the technique very attractive to movie and commercial studios, automotive industry (see figure \ref{fig:audi}), as well as architectural design studios (see figure \ref{fig:arch}) to simulate realistic illumination.  
 
 \begin{figure}[h]
 	\centering
@@ -118,17 +120,15 @@ Ray tracing is one of the rendering techniques capable of producing images with 
 	\label{fig:image2}
 \end{figure}
 
-
-
-Although one can produce very stunning imagery with a ray tracing based render engine, this  comes at a great computation cost, e.g.\ a frame from a recent computer generated Pixar's movie takes between three and eight hours to render. \cite{pixarRentime} \\
-Though great computation times, major animation studios seems nowadays to be fond of ray tracing and make switches from scanline-based rendering approaches such as "REYES" which were proved stable and fast over the years to ray tracing. \cite{pixarSwitch} That points to the demands in the entertainment industry for more physically accurate imagery, but also pushes the boundaries of research in ray tracing and its computational efficiency. \cite{disneyHyperion}
+Although one can produce very stunning imagery with a ray tracing based render engine, this  comes at a great computational cost, e.g.\ a frame from a recent computer generated Pixar's movie takes between three and eight hours to render. \cite{pixarRentime} \\
+Despite great computation times, major animation studios seem nowadays to be fond of ray tracing and switch to ray tracing from scanline-based rendering approaches, such as "REYES", which have been proved stable and fast over the years to ray tracing. \cite{pixarSwitch} That points to the demands in the entertainment industry for more physically accurate imagery, but also pushes the boundaries of research in ray tracing and its computational efficiency. \cite{disneyHyperion}
 
 % some history behind ray tracing
 \subsection{The roots of ray tracing}
-The first ray tracing algorithm was introduced by Arthur Appel in 1968 \cite{appel}, which idea was to shoot rays from the eye (camera), one per pixel, and find the closest object blocking the path of that ray. Using the material properties and the effect of the lights in the scene, this algorithm can determine the shading of objects. \\
-The next notable contribution in ray tracing was made by Turner Whitted in 1979 \cite{whitted}, who introduced a technique to compute shadows as well as the idea of recursive ray tracing to handle reflective and refractive materials. (see figure \ref{fig:whitted_example}).  
+The first ray tracing algorithm was introduced by Arthur Appel in 1968 \cite{appel}, whose idea was to shoot rays from the eye (camera), one per pixel, and find the closest object blocking the path of that ray. Using the material properties and the effect of the lights in the scene, this algorithm can determine the shading of objects. \\
+The next notable contribution in ray tracing was made by Turner Whitted in 1979 \cite{whitted}, who introduced a technique to compute shadows, as well as the idea of recursive ray tracing to handle reflective and refractive materials. (see figure \ref{fig:whitted_example}).  
 
-Other major contributions in the scene of ray tracing were made by Robert Cook in 1984 \cite{cook} and James Kajiya in 1986 \citep{kajiya} introducing distributed ray tracing and the Rendering equation respectively. Because the accompanying ray tracer does not make extensive use of these concepts, they won't be discussed in detail.
+Other major contributions in the scene of ray tracing were made by Robert Cook in 1984 \cite{cook} and James Kajiya in 1986 \citep{kajiya}, introducing distributed ray tracing and the Rendering equation respectively. Because the accompanying ray tracer does not make extensive use of these concepts, they won't be discussed in detail.
 
 % show whitted like image
 \begin{figure}[h]
@@ -147,7 +147,7 @@ Typically, each ray must be tested for intersection with some subset of all the 
 % show image depicting basic ray tracing algorithm
 \begin{figure}[h]
 	\centering
-    \includegraphics[width=0.7\textwidth]{ray_trace_algo}
+    \includegraphics[width=0.6\textwidth]{ray_trace_algo}
 	\caption{Image depicting the concept behind the ray tracing algorithm. Wikipedia}
     \label{fig:concept}
 \end{figure}
@@ -158,13 +158,16 @@ Typically, each ray must be tested for intersection with some subset of all the 
 
 \section{Ray-object intersection tests}
 \label{sec:isects}
-To explore ray-object intersections, one have to define first what is an intersection. An intersection is a point(s) along a half-line (from now on I'll use the word \textit{ray} meaning half-line) on which the given ray intersects a certain object. Mostly one is interested in the nearest intersection point along a ray. \\
-To find an intersection points between a ray and an object, one needs two definitions, one for the ray and one for the object which the ray intersects with. First comes the definition for a ray, since a ray is needed for all type of ray-object intersections.
+The main objective of the current chapter is to present the concepts along with some worth mentioning implementation details about the ray-object intersection tests used in the ray tracer.
+
+\vspace*{\baselineskip}
+
+To explore ray-object intersections, one has to first define what is an intersection. An intersection is point along a half-line (from now on I'll use the word \textit{ray} meaning half-line) on which а given ray intersects certain object. Mostly one is interested in the nearest intersection point along a ray.
 
 \subsection{Ray}
 
 % how is a ray geometrically defined
-A ray is geometrically defined using two vectors: a point $o$, which is called the \textit{origin} and a normal vector $\hat{d}$, which is gives the \textit{direction} of this ray. To be able to give the location of an intersection point $p$ along this ray, one introduces a scalar value $t$, which is the distance between the ray's origin $o$ and the intersection point $p$ we're looking for. One is mainly interested in intersection points "in front" of a ray, so the values for $t$ should be positive. The equation for the intersection point we'll be using from now on looks like: \cite{rftgu}
+A ray is geometrically defined using two vectors: a point $o$, which is called \textit{origin} and a normal vector $\hat{d}$, which is gives the \textit{direction} of the ray. To be able to give the exact location of an intersection point $p$ along the ray, one introduces a scalar value $t$, which is the distance between the ray's origin $o$ and the intersection point $p$. One is mainly interested in intersection points "in front" of the ray, so $t$ should have positive values. The parametric equation for a point along a ray looks like: \cite{rftgu}
 
 % intersection point along a ray
 \begin{align}
@@ -172,15 +175,56 @@ A ray is geometrically defined using two vectors: a point $o$, which is called t
 \end{align}
 
 % components of the ray within the ray tracer
-Within the implemented ray tracer a ray has five data members: origin point, direction, inverse of the the direction ($1 / \hat{d}$), sign of the ray's direction and a type component. \\
-The author has decided not to have an intersection point data member stored within the ray for memory efficiency. Depending on the scene a big part of the rays could not have any intersection points at all.\\
-The inverse of the ray's direction and sign of the ray's direction data members are used to optimize the performance of the ray-axis-aligned bounding box intersection test. Details will be provided on the following section on the topic.\\
+Within the implemented ray tracer a ray has five data members: 
+\begin{itemize}
+	\itemsep0em 	% reduce space between list items
+	\item \textit{origin}
+	\item \textit{direction}
+	\item \textit{inverse of the ray's direction ($1 / \hat{d}$)}
+	\item \textit{sign of the ray's direction}
+	\item \textit{type component: \textbf{primary}, \textbf{shadow}, \textbf{reflection}, \textbf{refraction}}
+\end{itemize}
+
+\vspace*{\baselineskip}
+
+The author has decided not to have an intersection point data member stored within the ray for memory efficiency. Depending on the scene a (big) part of the rays could not have any intersection points at all. \\
+The \textit{inverse of the ray's direction} and \textit{sign of the ray's direction} data members are used to optimize the performance of the ray-axis-aligned bounding box intersection test. Details will be provided on the following section on the topic.\\
 % types of a ray
-The type component is used for distinguishing between different type of rays and printing out a statistic for a given rendered scene. One distinguishes between following ray types in the implemented ray tracer: primary, shadow, reflection and refraction rays.
+The type component is used for distinguishing between different types of rays and further giving statistic for a given rendered scene.
+
+\subsection{Sphere}
 
 % how is a sphere defined in the ray tracer
+A sphere is defined by two components: a vector $c$, representing the sphere's center and a scalar value $r$, representing the sphere's radius. In the implemented ray tracer the author introduces a third component $r^2$ which is precomputed when constructing the sphere or when applying transformations which alter the sphere's radius. The parameter is later used to optimize ray-sphere computation efficiency.
+
+% show ray-spere intersection graphic
+% [11] is used to tell LaTeX the number of narrow lines; default is at 35... not good for every case
+% see following link for detailed explanation: https://tex.stackexchange.com/questions/214532/how-to-end-wrapfigure-environment
+\begin{wrapfigure}[11]{r}{0.5\textwidth} 
+    \centering
+    \includegraphics[width=0.4\textwidth]{ray_sphere}
+    \caption{A graphical motivation for the ray-sphere intersection test}
+    \label{fig:raysphere}
+\end{wrapfigure}
 
 % ray-sphere intersection
+Figure \ref{fig:raysphere} is of graphical assistance for the algorithm's concept and the author will use the same notation as given on the figure. The goal of the algorithm is to compute the intersection point $p(s-q)$ if the point in front of the ray's origin or $p(s+q)$ if the ray's origin is inside the sphere. On the way the algorithm can terminate, if its sure, that there is no intersection point for the given ray and sphere. The algorithm can be split in three parts: \cite{realtime_ren}
+
+% explain the ray-sphere intersection test splitting it into 3 parts 
+\begin{enumerate}[1.]
+\item This part is concerned with determining if a sphere is behind the ray's origin. If that is the case, one don't need to do further calculations and can exit the procedure for ray-sphere intersection. To do so first the vector $l = c - o$ and its squared length $l^2 = l \bullet l$ are computed. Further one computes the projection of $l$ onto the ray's direction $d$, $s = l \bullet d$. If $l^2 > r^2$ (the origin of the ray is outside the sphere) and $s < 0$ (ray's direction and the vector $l$ point in opposite directions) one can state, that the sphere is behind the ray's origin $\Rightarrow$ there is no intersection, else one can proceed with the second part of the algorithm.
+
+\item This part is concerned with determining if the ray misses а sphere. Similarly as in the first part, if that is the case, one can jump out of the procedure. First a triangle with sides $\lvert l \rvert$, $s$ and $m$ is constructed. The values of $l^2$ and $s$ are already computed in the last part. One can compute $m^2 = l^2 - s \cdot s$ using the Pythagorean theorem. \cite{pythagor} If $m^2 > r^2$ one can state, that the ray misses the sphere $\Rightarrow$ there is no intersection, else one can proceed with the last part of the algorithm.
+	
+\item In this part one computes the actual intersection point. To do so, a triangle with sides $r$, $m$ and $q$ is constructed. Using again the Pythagorean theorem, one can compute $q = \sqrt{r^2 - m^2}$. If $l^2 > r^2$ the sphere is in front of the ray, so the intersection point is $p(s-q)$, otherwise the ray's origin is inside the sphere and the closest intersection $p(s+q)$.
+\end{enumerate}
+
+Later for shading purposes one would need to determine the surface normal $\hat{sn}$ of a sphere's intersection point $p$. That is easily done knowing the sphere's center $c$:
+
+% find sphere's surface normal
+\begin{align}
+	\hat{sn} = \frac{p - c}{\lvert p - c \rvert}
+\end{align}
 
 % render multiple spheres + time measurements
 
