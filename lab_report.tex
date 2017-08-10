@@ -74,7 +74,7 @@ The report is split into five chapters with, each explaining a certain part of t
 
 \vspace*{\baselineskip}
 
-Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays, along with some information on the roots of ray tracing and the basic idea of the ray tracing algorithm.
+Current chapter (\ref{sec:intro}) is an introductory one giving details about the organisation of this report, motivation about why is ray tracing an important rendering technique and where does it find application nowadays, along with some information on the roots of ray tracing, the basic idea of the ray tracing algorithm and some implementation notes regarding the accompanying ray tracer.
 
 \vspace*{\baselineskip}
 
@@ -117,7 +117,6 @@ Ray tracing is one of the rendering techniques capable of producing images with 
 	\end{subfigure}
 	
 	\caption{Ray tracing used for visualisations by different industries}
-	\label{fig:image2}
 \end{figure}
 
 Although one can produce very stunning imagery with a ray tracing based render engine, this  comes at a great computational cost, e.g.\ a frame from a recent computer generated Pixar's movie takes between three and eight hours to render. \cite{pixarRentime} \\
@@ -151,6 +150,11 @@ Typically, each ray must be tested for intersection with some subset of all the 
 	\caption{Image depicting the concept behind the ray tracing algorithm. Wikipedia}
     \label{fig:concept}
 \end{figure}
+
+\subsection{Implementation notes}
+
+% add some implementation notes
+blabla
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -194,6 +198,12 @@ The type component is used for distinguishing between different types of rays an
 
 \subsection{Sphere}
 
+% some motivation on why one can render spheres... easy to implement
+% easy to intersect
+blabla...
+
+\vspace*{\baselineskip}
+
 % how is a sphere defined in the ray tracer
 A sphere is defined by two components: a vector $c$, representing the sphere's center and a scalar value $r$, representing the sphere's radius. In the implemented ray tracer the author introduces a third component $r^2$ which is precomputed when constructing the sphere or when applying transformations which alter the sphere's radius. The parameter is later used to optimize ray-sphere computation efficiency.
 
@@ -214,9 +224,9 @@ Figure \ref{fig:raysphere} is of graphical assistance for the algorithm's concep
 \begin{enumerate}[1.]
 \item This part is concerned with determining if a sphere is behind the ray's origin. If that is the case, one don't need to do further calculations and can exit the procedure for ray-sphere intersection. To do so first the vector $l = c - o$ and its squared length $l^2 = l \bullet l$ are computed. Further one computes the projection of $l$ onto the ray's direction $d$, $s = l \bullet d$. If $l^2 > r^2$ (the origin of the ray is outside the sphere) and $s < 0$ (ray's direction and the vector $l$ point in opposite directions) one can state, that the sphere is behind the ray's origin $\Rightarrow$ there is no intersection, else one can proceed with the second part of the algorithm.
 
-\item This part is concerned with determining if the ray misses а sphere. Similarly as in the first part, if that is the case, one can jump out of the procedure. First a triangle with sides $\lvert l \rvert$, $s$ and $m$ is constructed. The values of $l^2$ and $s$ are already computed in the last part. One can compute $m^2 = l^2 - s \cdot s$ using the Pythagorean theorem. \cite{pythagor} If $m^2 > r^2$ one can state, that the ray misses the sphere $\Rightarrow$ there is no intersection, else one can proceed with the last part of the algorithm.
+\item This part is concerned with determining if the ray misses а sphere. Similarly as in the first part, if that is the case, one can jump out of the procedure. First a triangle with sides $\lvert l \rvert$, $s$ and $m$ is constructed. The values of $l^2$ and $s$ are already computed in the last part. One can compute $m^2 = l^2 - s \cdot s$ using the Pythagorean theorem. If $m^2 > r^2$ one can state, that the ray misses the sphere $\Rightarrow$ there is no intersection, else one can proceed with the last part of the algorithm.
 	
-\item In this part one computes the actual intersection point. To do so, a triangle with sides $r$, $m$ and $q$ is constructed. Using again the Pythagorean theorem, one can compute $q = \sqrt{r^2 - m^2}$. If $l^2 > r^2$ the sphere is in front of the ray, so the intersection point is $p(s-q)$, otherwise the ray's origin is inside the sphere and the closest intersection $p(s+q)$.
+\item In this part one computes the actual intersection point. To do so, a triangle with sides $r$, $m$ and $q$ is constructed. Using again the Pythagorean theorem, one can compute $q = \sqrt{r^2 - m^2}$. If $l^2 > r^2$ the sphere is in front of the ray, so the intersection point is $p(s-q)$, otherwise the ray's origin is inside the sphere and the closest intersection is $p(s+q)$.
 \end{enumerate}
 
 Later for shading purposes one would need to determine the surface normal $\hat{sn}$ of a sphere's intersection point $p$. That is easily done knowing the sphere's center $c$:
@@ -226,13 +236,133 @@ Later for shading purposes one would need to determine the surface normal $\hat{
 	\hat{sn} = \frac{p - c}{\lvert p - c \rvert}
 \end{align}
 
+% show sphere renderers 
+\begin{figure}[h]
+	\centering
+	% show 10 spheres
+	\begin{subfigure}{0.3\textwidth}
+		\includegraphics[width=\textwidth]{10_spheres}
+		\caption{10 spheres}
+		\label{fig:10spheres}
+	\end{subfigure}%
+	\hfill
+	% show 100 spheres
+	\begin{subfigure}{0.3\textwidth}
+		\includegraphics[width=\textwidth]{100_spheres}
+		\caption{100 spheres}
+		\label{fig:100spheres}
+	\end{subfigure}
+	\hfill
+	% show 1000 spheres
+	\begin{subfigure}{0.3\textwidth}
+		\includegraphics[width=\textwidth]{1000_spheres}
+		\caption{1000 spheres}
+		\label{fig:1000spheres}
+	\end{subfigure}
+	
+	\caption{Sphere renderers}
+	\label{fig:spheres}
+\end{figure}
+
+% show a table with some statistics of the renderers
+\begin{table}[!ht]
+\centering
+	\begin{tabular}{*4c} 
+		\hline
+ 		Characteristic & 10 spheres & 100 spheres & 1000 spheres \\ [0.5ex] 
+ 		\hline\hline
+ 		primary rays & \multicolumn{3}{c}{14,745,600} \\ 
+ 		shadow rays & 2,844,918 & 11,097,272 & 23,438,134 \\
+ 		ray-sphere intersection tests & 175,905,180 & 2,584,287,200 & 38,183,734,000 \\
+ 		ray-sphere intersections & 1,885,914 & 9,110,632 & 28,189,459 \\
+ 		render time & 4 s & 44 s & 681 s \\
+ 		\hline
+	\end{tabular}
+\caption{Rendering information of the images at fig. \ref{fig:spheres}}
+\label{table:sphere_renders}
+\end{table}
+
+% put a sketch of the scene
+\begin{wrapfigure}[7]{r}{0.45\textwidth} 
+    \centering
+    \includegraphics[width=0.45\textwidth]{sphere_scene_sketch}
+    \caption{A sketch showing the scene set-up for the renderers at fig. \ref{fig:spheres}}
+    \label{fig:sphere_scene_sketch}
+\end{wrapfigure}
+
 % render multiple spheres + time measurements
+With the given algorithm one was able to render spheres (see figure \ref{fig:spheres}). The following renderers were done at 1280\textit{x}720 resolution with 16 samples per pixel without using any acceleration structures. For shading the Phong illumination model was used incorporating shadows as well. There are two light sources in the scene placed slightly left and slightly right in the front of the mound of spheres (see figure \ref{fig:sphere_scene_sketch}). Table \ref{table:sphere_renders} provides some rendering information. Using this initial rendering information the author was able to discover a bug, namely in the count of ray-sphere intersection tests, which values for the scenes with 100 and 1000 spheres were too close. The value for ray-sphere intersection tests for the given scenes could be easily calculated analytically:
+
+% give the formula for the number of ray-sphere intersection tests
+\centerline{\textit{ray-sphere intersection tests = (primary rays + shadow rays) * \# of spheres}}
+
+The ray tracer used \textit{uint32\_t} ($2^{32} = 4,294,967,295$) from the standard \textit{C++} types to represent this value. Although the author was firstly unaware that this value can be easily exceeded having a big enough scene, seeing the numbers convinced him. Currently the ray tracer uses \textit{uint64\_t} to represent rendering information such as the number of ray-sphere intersection tests. \\
+Making the assumption that the whole render time was spent doing ray-sphere intersections, one can give an average duration of the ray-sphere intersection test, which is roughly 20 nanoseconds. 
+
+\subsection{Axis-aligned bounding box}
+
+% some motivation on one why can intersect aabb
+Axis-aligned bounding boxes (AABB) are used in ray tracing to bound finite objects. Ray-AABB intersections are usually faster to calculate than exact ray-object intersections, and allow the construction of bounding volume hierarchies (BVHs) which reduce the number of objects that need to be considered for each ray. \cite{aabb} \\
+
+\vspace*{\baselineskip}
 
 % how is a axis aligned bounding-box defined in the ray tracer
+An AABB is defined in 3D space by two points: a minimum $b_{min}$ and a maximum $b_{max}$ bound. The bounds define a set of three pairs of parallel to the world coordinate axes planes, which encapsulate the box. The concept behind the ray-AABB intersection algorithm is to clip the ray by each pair of parallel planes, and if any portion of the ray remains, it intersects the AABB. The concept in 2D is illustrated by the following figure \ref{fig:aabb_concept}.
 
-% ray-aabb intersection
+% show concept of AABB intersection test
+\begin{figure}[h]
+	\centering
+	% show the aabb defined by xy-lines
+	\begin{subfigure}[t]{0.21\linewidth}
+		\includegraphics[width=\linewidth]{aabb1}
+		\caption{The two pairs of horizontal and vertical lines define the box}
+		\label{fig:aabb1}
+	\end{subfigure}
+\hfill
+	% show the rays clipped by the x pair of lines
+	\begin{subfigure}[t]{0.21\linewidth}
+		\includegraphics[width=\linewidth]{aabb2}
+		\caption{The two rays are clipped by the pair of horizontal lines}
+		\label{fig:aabb2}
+	\end{subfigure}
+\hfill
+	% show the rays clipped by the y pair of lines
+	\begin{subfigure}[t]{0.21\linewidth}
+		\includegraphics[width=\linewidth]{aabb3}
+		\caption{The two rays are clipped by the pair of vertical lines}
+		\label{fig:aabb3}
+	\end{subfigure}
+\hfill
+	% show the remainder of the intersected ray
+	\begin{subfigure}[t]{0.21\linewidth}
+		\includegraphics[width=\linewidth]{aabb4}
+		\caption{The remainder of  the left ray intersects he AABB, so there is an intersection}
+		\label{fig:aabb4}
+	\end{subfigure}
+	\caption{Concept of ray-AABB intersection test}
+	\label{fig:aabb_concept}
+\end{figure}
+
+The algorithm the author used in the ray tracer is based on this concept and includes optimizations relying on IEEE numerical properties of the floating point standard that ensure the intersection test is fast and robust. This optimizations make use of the \textit{ray's inverse direction ($1 / \hat{d}$)} and \textit{ray's direction sign} data members. \cite{efficient_raybox} \\
+Information about the speed gain of the render times one can achieve using AABB compared to those without would be discussed in the chapter on acceleration structures (see ch. \ref{sec:accel}). 
+
+\subsection{Triangles}
+
+% why does one care to intersect triangles
+Triangles have become a fundamental component in many graphical applications, because of their properties (memory efficiency as triangle strip \cite{triangle_strip}, fast intersections \cite{fast_triangle_isect}, triangulation \cite{triangulation}) . In ray tracing they're naturally preferred because of these properties. Most of the \textit{state of the art} ray tracers support triangles and triangulated meshes. 
+
+\vspace*{\baselineskip}
+
+% show picture of the vertex order (clockwise & counter-clockwise)
+\begin{wrapfigure}[10]{r}{0.45\textwidth} 
+    \centering
+    \includegraphics[width=0.45\textwidth]{triangle_vertices_n}
+    \caption{The order of the vertices change the direction of the surface normal. Scratch-a-pixel%}
+    \label{fig:tri_vertex_order}
+\end{wrapfigure}
 
 % how is a triangle defined in the ray-tracer
+A triangle is defined by three points (called vertices) $v0$, $v1$ and $v2$ and a surface normal $n$. One important aspect of triangles, one have to keep in mind when dealing with them is the order in which the vertices are defined (clockwise or counter-clockwise), because of their order depends if the surface normal will point inwards or outwards. 
 
 % ray-triangle intersection (geometric)
 
@@ -271,7 +401,6 @@ Later for shading purposes one would need to determine the surface normal $\hat{
 
 \section{Acceleration structures}
 \label{sec:accel}
-
 
 %----------------------------------------------------------------------------------------
 %	SECTION 7
